@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Classifier</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative; /* Add relative positioning to the body */
+        }
+
+        .container {
+            text-align: center;
+            
+            
+            
+        }
+
+        h1 {
+            margin-top: 30px;
+            margin-bottom: 30px;
+            /* Text animation */
+            animation: bounceIn 2s ease-in-out infinite;
+            text-shadow: 2px 2px 4px rgba(58, 15, 15, 0.3);
+            
+            /* Add shadow effect */
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: translateY(-10px);
+            }
+            50% {
+                transform: translateY(10px);
+            }
+            100% {
+                transform: translateY(-10px);
+            }
+        }
+
+        form {
+            margin-top: 30px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        label {
+            background-color: #0a0ef7;
+            color: white;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            border-radius: 20px;
+        }
+
+        label:hover {
+            background-color:#ded8ec;
+            color: black;
+        }
+
+        button {
+            background-color: #0a0ef7;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin: 0 10px;
+            padding-bottom: 10px; /* Adjusted padding */
+        }
+
+        button:hover {
+            background-color: #ded8ec;
+            color: black;
+        }
+
+        #refreshButton {
+            display: none; /* Hide the refresh button by default */
+            background-color: #0a0ef7;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        #refreshButton:hover {
+            background-color: #ded8ec;
+            color: black;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 20px;
+            background-color: #dddddd;
+        }
+
+        #imagePreview {
+            max-width: 300px;
+            margin: 0 auto; /* Center the image horizontally */
+            margin-top: 20px; /* Adjusted margin */
+            padding-bottom: 20px;
+            display: none;
+        }
+
+        .developer-title {
+            position: absolute;
+            bottom: 10px; /* Adjusted positioning to bottom */
+            left: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome To The Palm Leaves Disease Detection</h1>
+        <p class="developer-title">Developed by Ameer Khan and Muhammad Kashif</p>
+        <form id="uploadForm"  enctype="multipart/form-data" >
+            <input type="file" name="file" id="fileInput" accept="image/*" onchange="previewImage(event)">
+            <label for="fileInput">Select Image</label>
+            <img id="imagePreview" src="#" alt="Image Preview">
+            <button type="submit">Upload</button>
+            <button id="refreshButton" type="button" onclick="refreshPage()">Refresh</button>
+        </form>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function previewImage(event) {
+            var input = event.target;
+            var preview = document.getElementById('imagePreview');
+            var refreshButton = document.getElementById('refreshButton');
+
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    refreshButton.style.display = 'inline-block'; // Show the refresh button when an image is loaded
+                }
+
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                preview.style.display = 'none';
+                refreshButton.style.display = 'none'; // Hide the refresh button when no image is selected
+            }
+        }
+
+        function refreshPage() {
+            window.location.reload();
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var formData = new FormData();
+            formData.append('file', document.getElementById('fileInput').files[0]);
+
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').innerText = "Prediction: " + data.result;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
